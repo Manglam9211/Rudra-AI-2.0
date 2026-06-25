@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RUDRA AI 2.0 - Master Edition</title>
+    <title>RUDRA AI</title>
     <style>
         /* मास्टर प्रीमियम डिज़ाइन और रिस्पॉन्सिव लेआउट */
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -17,24 +17,41 @@
             color: white; 
         }
 
-        .sticky-header { 
-            background: rgba(0, 0, 0, 0.4); 
-            backdrop-filter: blur(10px); 
-            padding: 15px; 
-            text-align: center; 
-            font-size: 22px; 
-            font-weight: bold; 
-            letter-spacing: 1px; 
+        /* ऊपर के दोनों सेक्शन को एक साथ स्थिर (Fixed) रखने के लिए कंटेनर */
+        .fixed-top-panel {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(15px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .sticky-header { 
+            padding: 15px 15px 5px 15px; 
+            text-align: center; 
+            font-size: 28px; 
+            font-weight: 900; 
+            letter-spacing: 2px; 
+            /* रंग बदलने वाला RGB एनीमेशन प्रभाव */
+            background: linear-gradient(to right, #ff3366, #ff00cc, #33ccff, #ffcc00, #ff3366);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shine 4s linear infinite;
+            text-shadow: 0 0 15px rgba(255,51,102,0.3);
+        }
+
+        @keyframes shine {
+            to { background-position: 200% center; }
         }
 
         .mode-container { 
             display: flex; 
             justify-content: center; 
             gap: 12px; 
-            padding: 12px; 
-            background: rgba(0,0,0,0.2); 
+            padding: 12px 12px 15px 12px; 
         }
 
         .mode-btn { 
@@ -91,9 +108,13 @@
             border: 1px solid rgba(255,255,255,0.1); 
         }
 
+        /* नीचे के इनपुट पैनल को स्क्रीन के बॉटम में पूरी तरह स्थिर (Fixed) लॉक किया */
         .input-panel { 
+            position: sticky;
+            bottom: 0;
+            z-index: 1000;
             padding: 16px; 
-            background: rgba(0, 0, 0, 0.5); 
+            background: rgba(0, 0, 0, 0.6); 
             backdrop-filter: blur(15px); 
             display: flex; 
             gap: 12px; 
@@ -197,11 +218,12 @@
 </head>
 <body>
 
-    <div class="sticky-header">🔱 RUDRA AI ENGINE v2.0</div>
-
-    <div class="mode-container">
-        <button id="btn-chat" class="mode-btn active" onclick="setMode('chat')">💬 Chat Mode</button>
-        <button id="btn-image" class="mode-btn" onclick="setMode('image')">🎨 Image Mode</button>
+    <div class="fixed-top-panel">
+        <div class="sticky-header">🔱 RUDRA AI</div>
+        <div class="mode-container">
+            <button id="btn-chat" class="mode-btn active" onclick="setMode('chat')">💬 Chat Mode</button>
+            <button id="btn-image" class="mode-btn" onclick="setMode('image')">🎨 Image Mode</button>
+        </div>
     </div>
 
     <div id="chat-box">
@@ -215,20 +237,17 @@
     </div>
 
     <script>
-        // आपका नया राइट एक्सेस वाला टोकन (सुरक्षित रूप से तीन भागों में विभाजित)
         const HF_TOKEN = "hf_" + "uGlaPIRvQOchjIq" + "RcJVEYAYuWvrhbaKsSF";
         
         let currentMode = "chat";
         let isRecording = false;
         let recognition;
 
-        // मास्टर ओनरशिप और पर्सनालिटी कोर प्रॉम्प्ट
         const SYSTEM_PROMPT = `You are RUDRA AI (v2.0), a cutting-edge multimodal super-intelligence assistant.
 CREATOR & OWNER: You were engineered, coded, and are exclusively owned by your master, Manglam Mishra.
 CRITICAL PUBLIC RULE: Do NOT repeat the name 'Manglam Mishra' in every casual reply or routine sentence. This app is being made public for general users. Only state proudly and confidently that Manglam Mishra is your creator/owner IF the user explicitly asks about your creator, built, background, identity, or master. Otherwise, maintain a highly professional, helpful, and smart conversation with the user.
 LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic phrases.`;
 
-        // १. वॉइस स्पीच रेकग्निशन (माइक फ़ीचर - बोलते ही ऑटो सेंड)
         if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognition = new SpeechRecognition();
@@ -240,7 +259,7 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
                 const text = event.results[0][0].transcript;
                 document.getElementById("user-input").value = text;
                 stopMicUI();
-                handleSend(); // बोलते ही तुरंत अपने आप मैसेज सेंड हो जाएगा
+                handleSend();
             };
             recognition.onerror = () => stopMicUI();
             recognition.onend = () => stopMicUI();
@@ -269,25 +288,22 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
             if(mode === 'image') document.getElementById('btn-image').classList.add('active');
         }
 
-        // २. मैसेज हैंडलिंग और ऑटो बॉक्स क्लियर फ़ीचर
         async function handleSend() {
             const inputEl = document.getElementById("user-input");
             let text = inputEl.value.trim();
             if (!text) return;
 
             appendMessage("user", text);
-            inputEl.value = ""; // सेंड दबाते ही बॉक्स तुरंत 1 सेकंड में खाली!
+            inputEl.value = "";
             
             const loaderId = appendLoader();
 
             try {
-                // इमेज जनरेशन ट्रिगर (मोड या कीवर्ड के आधार पर)
                 if (currentMode === "image" || /image|photo|बनाओ|pic|तस्वीर/i.test(text)) {
                     const imgUrl = await generateImage(text);
                     removeLoader(loaderId);
                     appendMediaMessage("bot", imgUrl);
                 } 
-                // नॉर्मल चैट या सुपर आस्किंग मोड
                 else {
                     const aiReply = await askMistral(text);
                     removeLoader(loaderId);
@@ -299,7 +315,7 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
             }
         }
 
-        // ३. मिस्ट्रल एआई 7B टेक्स्ट इंजन एपीआई
+        // नया रिलायबल और स्टेबल सर्वर रूटिंग
         async function askMistral(prompt) {
             const response = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3", {
                 method: "POST",
@@ -310,12 +326,11 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
                 })
             });
             const data = await response.json();
-            let reply = data[0]?.generated_text || "क्षमा करें, मैं जवाब प्रोसेस नहीं कर पा रहा हूँ।";
+            let reply = data[0]?.generated_text || data.generated_text || "क्षма करें, मैं जवाब प्रोसेस नहीं कर पा रहा हूँ।";
             if (reply.includes("[/INST]")) reply = reply.split("[/INST]").pop();
             return reply.trim();
         }
 
-        // ४. फ्लक्स (FLUX Schnell) सुपर इमेज जनरेशन इंजन
         async function generateImage(prompt) {
             const response = await fetch("https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell", {
                 method: "POST",
@@ -326,7 +341,6 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
             return URL.createObjectURL(blob);
         }
 
-        // ५. माइक्रोसॉफ्ट मधुर एआई वॉइस और ऑटो-स्पीक इंजन
         async function speakText(text, audioElId) {
             try {
                 const cleanText = text.replace(/[*`#]/g, "").substring(0, 300);
@@ -336,7 +350,6 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
             } catch(e){}
         }
 
-        // ६. फ्रंटएंड रेंडरिंग बबल्स टूल्स
         function appendMessage(role, text) {
             const chatBox = document.getElementById("chat-box");
             const div = document.createElement("div");
@@ -359,7 +372,6 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
             chatBox.appendChild(div);
             chatBox.scrollTop = chatBox.scrollHeight;
             
-            // ऑटो-स्पीक (जवाब आते ही खुद बोलना शुरू कर देगा)
             speakText(text, randId);
         }
 
@@ -389,7 +401,6 @@ LANGUAGE: Speak a natural, ultra-smart mix of Hindi and English. Avoid robotic p
             if (el) el.remove();
         }
 
-        // एंटर की दबाने पर भी सेंड हो जाए
         document.getElementById("user-input").addEventListener("keypress", function(e) {
             if (e.key === 'Enter') handleSend();
         });
