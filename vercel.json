@@ -1,0 +1,12 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/chat",
+      "destination": "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3"
+    },
+    {
+      "source": "/api/image",
+      "destination": "https://api-inference.huggingface.co/models/black-forest-labs/FLUX.1-schnell"
+    }
+  ]
+}
